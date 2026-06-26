@@ -1,3 +1,3 @@
 # for-matt
 
-[View the docs](https://faithchris.github.io/for-matt/)
+(https://faithchris.github.io/for-matt/)
