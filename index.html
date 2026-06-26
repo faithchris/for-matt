@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart API · v1.0 Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #161B17;
+    --panel: #1E241F;
+    --panel-brown: #28241D;
+    --border: #34392F;
+    --sage: #94A988;
+    --sage-bright: #B8CBA9;
+    --tan: #C9A876;
+    --text: #E8E4DA;
+    --text-dim: #9A9384;
+    --text-faint: #6B6358;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(148,169,136,0.06), transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(201,168,118,0.05), transparent 45%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 24px 120px;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+  .brand strong { color: var(--sage-bright); font-weight: 600; }
+  .version-tag {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  /* ---- Status badge ---- */
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sage-bright);
+    box-shadow: 0 0 0 0 rgba(184,203,169,0.5);
+    animation: pulse 2.4s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(184,203,169,0.45); }
+    70% { box-shadow: 0 0 0 7px rgba(184,203,169,0); }
+    100% { box-shadow: 0 0 0 0 rgba(184,203,169,0); }
+  }
+  .status-row .code { color: var(--sage-bright); font-weight: 600; }
+  .status-row .label { color: var(--text-faint); }
+
+  h1.title {
+    font-family: var(--mono);
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 15.5px;
+    margin-bottom: 36px;
+    max-width: 540px;
+  }
+
+  /* ---- Request bar (signature element) ---- */
+  .request-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+  .request-bar .method {
+    background: var(--sage);
+    color: #14180F;
+    font-weight: 700;
+    padding: 14px 16px;
+    flex-shrink: 0;
+  }
+  .request-bar .path {
+    padding: 14px 16px;
+    color: var(--tan);
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .request-bar .path span { color: var(--text-faint); }
+
+  /* ---- Section ---- */
+  section { margin-bottom: 44px; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--sage-bright);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2 .method-tag {
+    font-size: 11px;
+    background: rgba(148,169,136,0.12);
+    color: var(--sage);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  p { color: var(--text); font-size: 15.5px; margin-bottom: 12px; }
+  p.note { color: var(--text-dim); font-size: 14px; }
+
+  /* ---- Code panel ---- */
+  .panel {
+    background: var(--panel-brown);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--sage);
+    border-radius: 6px;
+    padding: 18px 20px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.85;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+  .panel .k { color: var(--tan); }
+  .panel .s { color: var(--sage-bright); }
+  .panel .c { color: var(--text-faint); font-style: italic; }
+  .panel .punc { color: var(--text-faint); }
+
+  .callout {
+    border: 1px solid var(--border);
+    background: rgba(201,168,118,0.05);
+    border-left: 3px solid var(--tan);
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 14.5px;
+    color: var(--text-dim);
+    margin: 16px 0;
+  }
+  .callout strong { color: var(--tan); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 6px; }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 44px 0;
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 600px) {
+    h1.title { font-size: 26px; }
+    .wrap { padding: 36px 18px 80px; }
+    .request-bar { flex-direction: column; align-items: stretch; }
+    .request-bar .path { white-space: normal; }
+    footer { flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand"><strong>heart-api</strong> / docs</div>
+    <div class="version-tag">v1.0 · stable</div>
+  </div>
+
+  <div class="status-row">
+    <span class="dot"></span>
+    <span class="code">200 OK</span>
+    <span class="label">— service has been running without interruption since April 13</span>
+  </div>
+
+  <h1 class="title">Heart API Documentation</h1>
+  <p class="subtitle">A small, stable service maintained by Faith, for Matthew E. Phillips. No API key required — access was granted permanently the day you taught yourself chess just to play with him.</p>
+
+  <div class="request-bar">
+    <div class="method">GET</div>
+    <div class="path">/us/forever<span> — returns 200 OK, always</span></div>
+  </div>
+
+  <section>
+    <div class="section-label">01 · Overview</div>
+    <h2>Service Origin</h2>
+    <p>This API was first instantiated in <strong>CSIT 415 — Software Engineering</strong>, when two independent processes discovered they ran a lot better as one distributed system. No one filed a ticket for this. It just happened.</p>
+    <p class="note">This documentation describes the only endpoints that have ever mattered.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">02 · Endpoint</div>
+    <h2>/origin <span class="method-tag">GET</span></h2>
+    <p>Returns the initializing event.</p>
+    <div class="panel">
+<span class="punc">{</span>
+  <span class="k">"class"</span><span class="punc">:</span> <span class="s">"CSIT 415 — Software Engineering"</span><span class="punc">,</span>
+  <span class="k">"discovered"</span><span class="punc">:</span> <span class="s">"a kind, charismatic, ridiculously smart guy"</span><span class="punc">,</span>
+  <span class="k">"side_effect"</span><span class="punc">:</span> <span class="s">"learned chess. just for him."</span><span class="punc">,</span>
+  <span class="k">"rollback_available"</span><span class="punc">:</span> <span class="s">false</span>
+<span class="punc">}</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">03 · Endpoint</div>
+    <h2>/events/first-date <span class="method-tag">GET</span></h2>
+    <p>Logged April 13. Two events fired that day.</p>
+    <div class="panel">
+<span class="punc">{</span>
+  <span class="k">"earlier"</span><span class="punc">:</span> <span class="punc">{</span>
+    <span class="k">"location"</span><span class="punc">:</span> <span class="s">"CELS building rooftop terrace"</span><span class="punc">,</span>
+    <span class="k">"duration"</span><span class="punc">:</span> <span class="s">"hours, somehow"</span><span class="punc">,</span>
+    <span class="k">"then"</span><span class="punc">:</span> <span class="s">"food, still talking"</span>
+  <span class="punc">},</span>
+  <span class="k">"later"</span><span class="punc">:</span> <span class="punc">{</span>
+    <span class="k">"location"</span><span class="punc">:</span> <span class="s">"the beach"</span><span class="punc">,</span>
+    <span class="k">"activity"</span><span class="punc">:</span> <span class="s">"stargazing"</span><span class="punc">,</span>
+    <span class="k">"quote"</span><span class="punc">:</span> <span class="s">"I'll be a star in your sky"</span><span class="punc">,</span>
+    <span class="k">"conditions"</span><span class="punc">:</span> <span class="s">"cold, waves crashing"</span><span class="punc">,</span>
+    <span class="k">"sacrifice"</span><span class="punc">:</span> <span class="s">"brand new white hoodie, soaked, given without hesitation"</span>
+  <span class="punc">}</span>
+<span class="punc">}</span>
+    </div>
+    <div class="callout">
+      <strong>known behavior</strong>
+      Neither node has been able to explain why they can't go very long without each other since this date. Engineering has classified this as expected, not a bug.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">04 · Endpoint</div>
+    <h2>/status/after-the-rough-patch <span class="method-tag">PATCH</span></h2>
+    <p>A few days in, the connection weakened briefly. A patch was deployed.</p>
+    <div class="panel">
+<span class="punc">{</span>
+  <span class="k">"patch_applied_by"</span><span class="punc">:</span> <span class="s">"Matthew"</span><span class="punc">,</span>
+  <span class="k">"patch_description"</span><span class="punc">:</span> <span class="s">"took care of her, no questions asked"</span><span class="punc">,</span>
+  <span class="k">"result"</span><span class="punc">:</span> <span class="s">"more in love than before the patch"</span><span class="punc">,</span>
+  <span class="k">"rollback"</span><span class="punc">:</span> <span class="s">"unavailable, and not wanted"</span>
+<span class="punc">}</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">05 · Reference</div>
+    <h2>/attributes <span class="method-tag">GET</span></h2>
+    <p>Core, non-deprecating properties of the linked user.</p>
+    <div class="panel">
+<span class="punc">{</span>
+  <span class="k">"mind"</span><span class="punc">:</span> <span class="s">"sharp, curious, a little too smart for his own good"</span><span class="punc">,</span>
+  <span class="k">"heart"</span><span class="punc">:</span> <span class="s">"kind, all the way through"</span><span class="punc">,</span>
+  <span class="k">"humor"</span><span class="punc">:</span> <span class="s">"witty, lands every time"</span><span class="punc">,</span>
+  <span class="k">"smile"</span><span class="punc">:</span> <span class="s">"structurally significant"</span><span class="punc">,</span>
+  <span class="k">"eyes"</span><span class="punc">:</span> <span class="s">"brown, with lines at the corners when he laughs"</span><span class="punc">,</span>
+  <span class="k">"hair"</span><span class="punc">:</span> <span class="s">"brown"</span><span class="punc">,</span>
+  <span class="k">"voice"</span><span class="punc">:</span> <span class="s">"calming, even when talking tech for twenty minutes straight"</span>
+<span class="punc">}</span>
+    </div>
+    <p class="note">No deprecation planned. None of this is replaceable.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">06 · Behavior</div>
+    <h2>/together <span class="method-tag">GET</span></h2>
+    <p>Observed states when both nodes are connected.</p>
+    <div class="panel">
+<span class="punc">{</span>
+  <span class="k">"when_he_explains_something_technical"</span><span class="punc">:</span> <span class="s">"she's actually listening"</span><span class="punc">,</span>
+  <span class="k">"when_he_walks_her_through_it"</span><span class="punc">:</span> <span class="s">"patient, never makes her feel slow"</span><span class="punc">,</span>
+  <span class="k">"when_he_takes_care_of_her"</span><span class="punc">:</span> <span class="s">"felt, every time"</span><span class="punc">,</span>
+  <span class="k">"when_he_raves_about_his_interests"</span><span class="punc">:</span> <span class="s">"her favorite sound"</span><span class="punc">,</span>
+  <span class="k">"when_his_day_is_finally_done"</span><span class="punc">:</span> <span class="s">"she wants to be there"</span><span class="punc">,</span>
+  <span class="k">"when_the_world_feels_heavy_on_him"</span><span class="punc">:</span> <span class="s">"she wants to carry some of it"</span>
+<span class="punc">}</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">07 · Commitment</div>
+    <h2>/promise <span class="method-tag">POST</span></h2>
+    <p>Submitted once. Standing indefinitely.</p>
+    <div class="panel">
+<span class="punc">{</span>
+  <span class="k">"promise"</span><span class="punc">:</span> <span class="punc">[</span>
+    <span class="s">"to be somewhere he can lay down and find peace"</span><span class="punc">,</span>
+    <span class="s">"to stay by his side no matter how hard it gets"</span><span class="punc">,</span>
+    <span class="s">"to keep becoming better, for both of them"</span><span class="punc">,</span>
+    <span class="s">"to be the best for him, the way they deserve for each other"</span>
+  <span class="punc">],</span>
+  <span class="k">"ttl"</span><span class="punc">:</span> <span class="s">"lifetime"</span><span class="punc">,</span>
+  <span class="k">"status"</span><span class="punc">:</span> <span class="s">"active"</span>
+<span class="punc">}</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="section-label">08 · Changelog</div>
+    <h2>v2.0 <span class="method-tag">PLANNED</span></h2>
+    <p>There is no v2.0 on the roadmap. v1.0 is already exactly what was needed — accidentally built in a software engineering class, sealed by a hoodie sacrificed on a cold beach, kept running ever since by two people who run better in parallel than alone.</p>
+  </section>
+
+  <footer>
+    <span>maintainer: Faith, for Matthew</span>
+    <span>uptime: since April 13 · counting</span>
+  </footer>
+
+</div>
+</body>
+</html>
